@@ -1,5 +1,6 @@
 class RockPaperScissors {
   constructor() {
+    this.round = 1;
     this.computerScore = 0;
     this.playerScore = 0;
     this.gameChoices = ["rock", "paper", "scissors"];
@@ -7,38 +8,76 @@ class RockPaperScissors {
   }
 
   checkRoundWinner(playerChoice, computerChoice) {
-    console.log("Player Choice: ", playerChoice);
-    console.log("Computer Choice: ", computerChoice);
+    // 2D-array to find winner
+    // user selection; x-axis
+    // computer selection; y-axis
+    // the order across and down axes is rock --> paper --> scissors
+    // result[computerChoiceIndex][playerChoiceIndex] to determine winner
+    const result = [
+      ["tie", "player", "cpu"],
+      ["cpu", "tie", "player"],
+      ["player", "cpu", "tie"],
+    ];
 
-    if (playerChoice === computerChoice) {
-      this.sendNotifications("Draw! Go Again!");
+    const playerChoiceIndex = this.gameChoices.indexOf(playerChoice);
+    const computerChoiceIndex = this.gameChoices.indexOf(computerChoice);
+
+    const winner = result[computerChoiceIndex][playerChoiceIndex];
+
+    if (winner === "tie") {
+      this.sendNotifications("It was a tie! Go again!");
+      const { playerChoice, computerChoice } = this.getSelections();
+      this.checkRoundWinner(playerChoice, computerChoice);
+      return;
     }
 
-    if (playerChoice === "rock" && computerChoice == "scissors") {
-      this.playerScore++;
-      this.sendNotifications("Player Wins");
+    if (winner === "player") this.playerScore++;
+    if (winner === "cpu") this.computerScore++;
+
+    this.sendNotifications(`${winner} has won round ${this.round++}`);
+    this.checkGameWinner();
+  }
+
+  checkGameWinner() {
+    if (this.playerScore === 3) {
+      this.winner = "Player";
+      this.sendNotifications("Player has won the best of 5! Congratulations!");
     }
 
-    if (playerChoice === "rock" && computerChoice == "paper") {
-      this.playerScore++;
-      this.sendNotifications("Computer Wins");
+    if (this.computerScore === 3) {
+      this.winner = "Computer";
+      this.sendNotifications(
+        "Computer has won! Machines will take over the world!"
+      );
     }
+  }
+
+  getSelections() {
+    const computerChoice = computer.selectRandomChoice();
+    const playerChoice = player.getPlayerChoice();
+
+    return {
+      computerChoice,
+      playerChoice,
+    };
   }
 
   sendNotifications(message) {
     alert(message);
   }
 
-  checkGameWinner() {}
-
   start() {
-    //   use while loop to play multiple rounds until computer/player gets to 3 score (best of 5)
-    // while (!this.winner) {
-    const computerChoice = computer.selectRandomChoice();
-    const playerChoice = player.getPlayerChoice();
+    while (!this.winner) {
+      const { playerChoice, computerChoice } = this.getSelections();
+      this.checkRoundWinner(playerChoice, computerChoice);
+    }
+  }
 
-    this.checkRoundWinner(playerChoice, computerChoice);
-    // }
+  restart() {
+    this.round = 1;
+    this.computerScore = 0;
+    this.playerScore = 0;
+    this.winner = null;
   }
 }
 
@@ -62,7 +101,7 @@ class Player extends RockPaperScissors {
     while (!this.gameChoices.includes(validatedInput)) {
       validatedInput = prompt(
         "Sorry, that's not a valid choice. Please select rock, paper or scissors"
-      );
+      ).toLowerCase();
     }
 
     return validatedInput;
