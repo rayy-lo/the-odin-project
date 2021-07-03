@@ -1,0 +1,13 @@
+#container {
+  height: 50vh;
+  width: 50vh;
+  display: grid;
+  margin: 0 auto;
+  border: 1px solid black;
+}
+
+.square {
+}
+
+.empty {
+}
