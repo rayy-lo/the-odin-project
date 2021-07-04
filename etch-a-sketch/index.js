@@ -1,33 +1,60 @@
 class EtchASketch {
-  constructor(container, squareColumns) {
+  constructor(container, gridSize = 16) {
     this.container = container;
-    this.squareColumns = squareColumns;
-    this.squareRows = this.squareColumns;
+    this.gridSize = gridSize;
     // dynamically set number of columns and rows
-    this.container.style.gridTemplateColumns = `repeat(${this.squareColumns}, 1fr)`;
-    this.renderSquares();
+    this.setGridTemplateColumns(gridSize);
+    this.renderSquares(gridSize);
   }
 
-  renderSquares() {
-    const totalSquares = this.squareColumns * this.squareRows;
-    for (let i = 0; i <= totalSquares; i++) {
-      new Square();
+  renderSquares(gridSize) {
+    const totalSquares = gridSize ** 2;
+    for (let i = 1; i <= totalSquares; i++) {
+      const square = new Square();
+      square.addSquareToGrid(this.container);
     }
   }
-}
 
-class Square extends EtchASketch {
-  constructor() {
-    super(container);
-    this.element = document.createElement("div");
-    this.element.className = "square empty";
-    this.addSquaresToGrid();
+  setGridTemplateColumns(gridSize) {
+    this.container.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
   }
 
-  addSquaresToGrid() {
-    this.container.appendChild(this.element);
+  clearGrid() {
+    this.container.innerHTML = "";
+  }
+
+  createNewGrid() {
+    const gridSize = this.promptGridSize();
+    this.clearGrid();
+    this.renderSquares(gridSize);
+    this.setGridTemplateColumns(gridSize);
+  }
+
+  promptGridSize() {
+    return prompt("What should the grid size be?");
+  }
+}
+class Square {
+  constructor() {
+    this.element = document.createElement("div");
+    this.element.className = "square";
+    this.element.addEventListener("mouseover", this.onHover);
+  }
+
+  onHover(e) {
+    if (e.target.classList.contains("hovered")) return;
+    e.target.classList.add("hovered");
+  }
+
+  addSquareToGrid(container) {
+    container.appendChild(this.element);
   }
 }
 
 const container = document.querySelector("#container");
-const etchASketch = new EtchASketch(container, 16);
+const etchASketch = new EtchASketch(container);
+const btn = document.querySelector("#clearGridBtn");
+
+btn.addEventListener("click", (event) => {
+  etchASketch.createNewGrid();
+});
