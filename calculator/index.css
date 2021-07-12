@@ -35,3 +35,7 @@
   align-items: end;
   justify-content: flex-end;
 }
+
+[data-button-type="clear"] {
+  grid-column: 1 / 3;
+}
