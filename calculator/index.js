@@ -61,8 +61,79 @@ class EqualButton {
     el.addEventListener("click", this.calculateInput.bind(this));
   }
 
+  getInputArr() {
+    const input = calculator.inputState;
+    let operand = "";
+    const inputArr = [];
+
+    for (let i = 0; i < input.length; i++) {
+      let char = input[i];
+      if (isNaN(char)) {
+        inputArr.push(parseInt(operand));
+        inputArr.push(char);
+        operand = "";
+      } else {
+        operand += char;
+      }
+
+      // Adds last operand to array
+      if (i === input.length - 1) {
+        inputArr.push(parseInt(operand));
+      }
+    }
+
+    return inputArr;
+  }
+
   calculateInput() {
-    console.log("calculate");
+    const inputArr = this.getInputArr();
+    while (inputArr.length > 1) {
+      if (inputArr.indexOf("÷") > -1) {
+        const index = inputArr.indexOf("÷");
+        const firstOperand = inputArr[index - 1];
+        const secondOperand = inputArr[index + 1];
+        let total = firstOperand / secondOperand;
+        inputArr[index] = total;
+        inputArr.splice(index + 1, 1);
+        inputArr.splice(index - 1, 1);
+        continue;
+      }
+
+      if (inputArr.indexOf("x") > -1) {
+        const index = inputArr.indexOf("x");
+        const firstOperand = inputArr[index - 1];
+        const secondOperand = inputArr[index + 1];
+        let total = firstOperand * secondOperand;
+        inputArr[index] = total;
+        inputArr.splice(index + 1, 1);
+        inputArr.splice(index - 1, 1);
+        continue;
+      }
+
+      if (inputArr.indexOf("+") > -1) {
+        const index = inputArr.indexOf("+");
+        const firstOperand = inputArr[index - 1];
+        const secondOperand = inputArr[index + 1];
+        let total = firstOperand + secondOperand;
+        inputArr[index] = total;
+        inputArr.splice(index + 1, 1);
+        inputArr.splice(index - 1, 1);
+        continue;
+      }
+
+      if (inputArr.indexOf("-") > -1) {
+        const index = inputArr.indexOf("-");
+        const firstOperand = inputArr[index - 1];
+        const secondOperand = inputArr[index + 1];
+        let total = firstOperand - secondOperand;
+        inputArr[index] = total;
+        inputArr.splice(index + 1, 1);
+        inputArr.splice(index - 1, 1);
+      }
+    }
+
+    calculator.inputState = inputArr[0];
+    calculator.updateScreen();
   }
 }
 
