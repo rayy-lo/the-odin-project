@@ -1,0 +1,26 @@
+#books {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  margin-bottom: 2rem;
+}
+
+.Card {
+  display: flex;
+  flex-direction: column;
+}
+
+.book-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 30%;
+  margin: 0 auto;
+}
+
+.book-form > label {
+  margin: 1rem 0;
+}
+
+#add-book-btn {
+  margin: 1rem 0;
+  height: 50px;
+}
