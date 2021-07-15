@@ -1,0 +1,18 @@
+#tictactoe {
+  max-width: 60%;
+  margin: 0 auto;
+  grid-template: repeat(3, 200px) / repeat(3, 1fr);
+  display: grid;
+  align-items: center;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+}
+
+.square {
+  font-size: 10rem;
+  text-align: center;
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+  height: 100%;
+  margin: 0 -1px 0 0;
+}
