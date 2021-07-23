@@ -4,12 +4,10 @@ const gameBoard = (() => {
   const updateBoard = (event) => {
     const square = event.target;
     if (square.textContent !== "") return;
-    const marker = gameLogic.get_PlayerToPlay().getMarker();
+    const marker = gameLogic.getPlayerToPlay().getMarker();
     square.textContent = marker;
 
     events.publish("playedNewMove", square);
-
-    // gameLogic.updateState(row, column);
   };
 
   const bindEvents = () => {
@@ -18,10 +16,6 @@ const gameBoard = (() => {
   };
 
   bindEvents();
-
-  return {
-    updateBoard,
-  };
 })();
 
 const gameLogic = (() => {
@@ -30,36 +24,51 @@ const gameLogic = (() => {
     ["", "", ""],
     ["", "", ""],
   ];
-  const cpu = playerFactory("X");
-  const player = playerFactory("O");
-  let _playerToPlay = player;
+  let _moves = 0;
+  const _cpu = playerFactory("X", "Computer");
+  const _player = playerFactory("O", "Player");
+  let _playerToPlay = _player;
 
-  const updateState = (square) => {
+  const _updateState = (square) => {
+    _moves++;
     const row = square.getAttribute("data-row");
     const column = square.getAttribute("data-column");
-    _state[row][column] = _playerToPlay.getMarker();
+    _state[row][column] = square.textContent;
   };
-
-  const getPlayerToPlay = () => {
-    return playerToPlay;
-  };
-
-  const checkForWinner = () => {
+  const _checkForWinner = (square) => {
     console.log("check for winner");
+    if (_moves === 9) events.publish("noWinner", square);
   };
 
-  const changePlayerTurn = () => {
-    _playerToPlay = _playerToPlay === player ? cpu : player;
+  const _changePlayerTurn = () => {
+    _playerToPlay = _playerToPlay === _player ? _cpu : _player;
   };
 
   events.subscribe("playedNewMove", function (square) {
-    updateState(square);
-    checkForWinner();
-    changePlayerTurn();
+    _updateState(square);
+    _checkForWinner();
+    _changePlayerTurn();
   });
+
+  const getPlayerToPlay = () => {
+    return _playerToPlay;
+  };
 
   return {
     getPlayerToPlay,
-    _state,
   };
+})();
+
+const announcer = (() => {
+  const announcerNode = document.querySelector("#announcer");
+
+  const updateAnnouncement = () => {
+    const playerName = gameLogic.getPlayerToPlay().getName();
+    const playerMarker = gameLogic.getPlayerToPlay().getMarker();
+    announcerNode.textContent = `It is ${playerName}'s (${playerMarker}) turn`;
+  };
+
+  updateAnnouncement();
+
+  events.subscribe("playedNewMove", updateAnnouncement);
 })();
