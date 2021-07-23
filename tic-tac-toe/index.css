@@ -16,3 +16,12 @@
   height: 100%;
   margin: 0 -1px 0 0;
 }
+
+#announcer {
+  text-align: center;
+  padding: 2rem;
+  background: orange;
+  max-width: 50%;
+  margin: 0 auto 3rem;
+  border-radius: 5px;
+}
