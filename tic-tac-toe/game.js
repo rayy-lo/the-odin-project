@@ -28,16 +28,58 @@ const gameLogic = (() => {
   const _cpu = playerFactory("X", "Computer");
   const _player = playerFactory("O", "Player");
   let _playerToPlay = _player;
+  let _isGameFinished = false;
 
   const _updateState = (square) => {
-    _moves++;
     const row = square.getAttribute("data-row");
     const column = square.getAttribute("data-column");
+    _moves++;
     _state[row][column] = square.textContent;
   };
   const _checkForWinner = (square) => {
-    console.log("check for winner");
-    if (_moves === 9) events.publish("noWinner", square);
+    if (_moves === 9) {
+      _isGameFinished = true;
+      events.publish("gameFinished", "draw");
+    }
+
+    const checkDiagonals = (marker) => {
+      const topLeftToBottomRight = [];
+      const topRightToBottomLeft = [];
+
+      for (let i = 0; i < _state.length; i++) {
+        topLeftToBottomRight.push(_state[i][i]);
+        topRightToBottomLeft.push(_state[i][_state.length - i - 1]);
+      }
+
+      return (
+        topLeftToBottomRight.every((mark) => mark === marker) ||
+        topRightToBottomLeft.every((mark) => mark === marker)
+      );
+    };
+
+    const checkRows = (marker) => {
+      return _state.some((row) => row.every((mark) => mark === marker));
+    };
+
+    const checkColumns = (marker) => {
+      const columns = [];
+      for (let i = 0; i < _state.length; i++) {
+        const column = _state.map((row) => row[i]);
+        columns.push(column);
+      }
+
+      return columns.some((row) => row.every((mark) => mark === marker));
+    };
+
+    let checkForWinner =
+      checkRows(square.textContent) ||
+      checkColumns(square.textContent) ||
+      checkDiagonals(square.textContent);
+
+    if (checkForWinner) {
+      _isGameFinished = true;
+      events.publish("gameFinished", _playerToPlay);
+    }
   };
 
   const _changePlayerTurn = () => {
@@ -46,7 +88,7 @@ const gameLogic = (() => {
 
   events.subscribe("playedNewMove", function (square) {
     _updateState(square);
-    _checkForWinner();
+    _checkForWinner(square);
     _changePlayerTurn();
   });
 
@@ -54,7 +96,12 @@ const gameLogic = (() => {
     return _playerToPlay;
   };
 
+  const getIsGameFinished = () => {
+    return _isGameFinished;
+  };
+
   return {
+    getIsGameFinished,
     getPlayerToPlay,
   };
 })();
@@ -62,13 +109,35 @@ const gameLogic = (() => {
 const announcer = (() => {
   const announcerNode = document.querySelector("#announcer");
 
-  const updateAnnouncement = () => {
+  const announcePlayerTurn = () => {
+    if (gameLogic.getIsGameFinished()) return;
+
     const playerName = gameLogic.getPlayerToPlay().getName();
     const playerMarker = gameLogic.getPlayerToPlay().getMarker();
-    announcerNode.textContent = `It is ${playerName}'s (${playerMarker}) turn`;
+    const message = `It is ${playerName}'s (${playerMarker}) turn`;
+    updateAnnouncer(message);
   };
 
-  updateAnnouncement();
+  const updateAnnouncer = (message) => {
+    announcerNode.textContent = message;
+  };
 
-  events.subscribe("playedNewMove", updateAnnouncement);
+  announcePlayerTurn();
+
+  const declareWinner = (result) => {
+    let message = null;
+
+    if (result === "draw") {
+      message = "It's a draw! No winners";
+    }
+
+    if (result) {
+      message = `The winner is ${result.getName()} (${result.getMarker()})!`;
+    }
+
+    updateAnnouncer(message);
+  };
+
+  events.subscribe("playedNewMove", announcePlayerTurn);
+  events.subscribe("gameFinished", declareWinner);
 })();
